@@ -8,6 +8,9 @@ using Persistence;
 using Microsoft.EntityFrameworkCore;
 using MediatR;
 using Application.Activities;
+using FluentValidation.AspNetCore;
+using API.Middlware;
+using System.Diagnostics;
 
 namespace API
 {
@@ -23,6 +26,11 @@ namespace API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+           /* services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
+            });*/
+
             services.AddDbContext<DataContext>(op =>
             {
                 op.UseSqlServer(@"Data Source=DESKTOP-6POC7D5\SQLEXPRESS;Initial Catalog=PartyGuysDB;Integrated Security=True");
@@ -30,7 +38,10 @@ namespace API
 
 
             services.AddMediatR(typeof(List.Handler).Assembly);
-            services.AddControllers();
+            services.AddControllers().AddFluentValidation(cfg=> {
+                cfg.RegisterValidatorsFromAssemblyContaining<Create>();
+            });
+
             services.AddCors(opt => {
                 opt.AddPolicy(
                 "CorsPolicy", policy => {
@@ -39,20 +50,18 @@ namespace API
 
             });
          
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
-            });
+           
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseMiddleware<ErrorHandlingMiddleware>();
             if (env.IsDevelopment())
             {
-                app.UseDeveloperExceptionPage();
-                app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "API v1"));
+              //  app.UseDeveloperExceptionPage();
+               // app.UseSwagger();
+              //  app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "API v1"));
             }
             app.UseCors("CorsPolicy");
             app.UseRouting();

@@ -4,14 +4,13 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace API.Controllers
 {
     [ApiController]
     [Route("api/activities")]
-    public class ActivitiesController:ControllerBase
+    public class ActivitiesController : ControllerBase
     {
         private readonly IMediator mediator;
 
@@ -21,32 +20,41 @@ namespace API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<Activity>>> List(CancellationToken ct) {
-
-            return await mediator.Send(new List.Query(),ct);
+        public async Task<ActionResult<List<Activity>>> List()
+        {
+            return await mediator.Send(new List.Query());
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Activity>> Details(Guid id) {
-            return await mediator.Send(new Details.Query { Id=id});
+        public async Task<ActionResult<Activity>> Details(Guid id)
+        {
+            return await mediator.Send(new Details.Query { Id = id });
         }
 
         [HttpPost]
-        public async Task<ActionResult<Unit>> Create(Create.Command command) {
+        public async Task<ActionResult<Unit>> Create(Create.Command command)
+        {
+            if (!ModelState.IsValid) {
+                return BadRequest(ModelState);
+            }
 
             return await mediator.Send(command);
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<Unit>> Edit(Guid id, Edit.Command command) {
+        public async Task<ActionResult<Unit>> Edit(Guid id, Edit.Command command)
+        {
             command.Id = id;
 
-            return await mediator.Send(command);       
+            return await mediator.Send(command);
         }
 
 
+
+
         [HttpDelete("{id}")]
-        public async Task<ActionResult<Unit>> Delete(Guid id) {
+        public async Task<ActionResult<Unit>> Delete(Guid id)
+        {
             return await mediator.Send(new Delete.Command { Id = id });
         }
     }
