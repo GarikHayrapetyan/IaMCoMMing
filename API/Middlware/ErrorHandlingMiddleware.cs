@@ -58,6 +58,7 @@ namespace API.Middlware
                     errors
                 });
 
+
                 await context.Response.WriteAsync(result);
             }
         }
